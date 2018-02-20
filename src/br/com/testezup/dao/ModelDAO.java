@@ -1,5 +1,121 @@
 package br.com.testezup.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import java.util.ArrayList;
+import java.util.List;
+
+import br.com.testezup.models.Model;
+import br.com.testezup.sql.Statements;
+
 public class ModelDAO {
 
+	private Connection con;
+	Savepoint save;
+	
+	public ModelDAO(){
+		try{
+			this.con = new ConnectionFactory().getConnection();					
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	public ModelDAO(Connection con){
+		this.con = con;
+	}
+	
+	public List<String> getModels(){
+		try{
+			List<String> models = new ArrayList<String>();
+			String query = Statements.getModels();
+			PreparedStatement stmt = con.prepareStatement(query);					
+			
+			ResultSet rs = stmt.executeQuery();
+			
+			while(rs.next()){								
+				models.add(rs.getString("name"));
+			}
+			
+			rs.close();
+			stmt.close();
+			
+			return models;
+		} catch (SQLException ex){
+			throw new RuntimeException(ex);
+		}
+	}	
+	
+	public Model getModel(String modelName){
+		try{
+			Model model = new Model();
+			String query = Statements.getModel();
+			PreparedStatement stmt = con.prepareStatement(query);					
+			
+			stmt.setString(1, modelName);
+			
+			ResultSet rs = stmt.executeQuery();
+			
+			while(rs.next()){								
+				model.setModelName(rs.getString("name"));
+			}
+			
+			rs.close();
+			stmt.close();
+			
+			return model;
+		} catch (SQLException ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	public void insertNewModel(String modelName){
+		try{
+			String query = Statements.insertNewModel();
+			PreparedStatement stmt = con.prepareStatement(query);
+			
+			stmt.setString(1, modelName);
+			
+			stmt.execute();
+			stmt.close();
+			
+			
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public void insertNewModelAttributes(String modelName, String attrname, String attrtype) {
+		try{
+			String query = Statements.insertNewModelAttributes();
+			PreparedStatement stmt = con.prepareStatement(query);
+			
+			stmt.setString(1, modelName);
+			stmt.setString(2, attrname);
+			stmt.setString(3, attrtype);
+			
+			stmt.execute();
+			stmt.close();
+						
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}		
+	}
+
+	public void createNewModel(String modelName, String columns) {
+		try{
+			String query = Statements.createModel(modelName,columns);
+			PreparedStatement stmt = con.prepareStatement(query);			
+			
+			stmt.execute();
+			stmt.close();
+			
+			
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}		
+	}
 }
