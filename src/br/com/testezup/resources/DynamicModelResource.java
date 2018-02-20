@@ -12,34 +12,41 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import br.com.testezup.dao.DynamicModelDAO;
 import br.com.testezup.dao.ModelDAO;
 import br.com.testezup.models.Model;
+import br.com.testezup.services.DynamicModelService;
 import br.com.testezup.services.ModelService;
 
-@Path("models")
-public class ModelResource {
-
+@Path("models/{modelName}")
+public class DynamicModelResource {
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getModels(){
-		try {
-			List<String> models = new ModelDAO().getModels();
-			return new Gson().toJson(models);
+	public String getDynamicModels(@PathParam("modelName") String modelName){
+		try {		
+			
+			JSONArray data = new DynamicModelService().getDynamicModels(modelName);
+			
+			return data.toString();
 		} catch (Exception ex) {
 			return "[{\"status\":\"erro\",\"mensagem\":\"" + ex.getMessage() + "\"}]";
 		}
 	}
 	
 	@GET
+	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{modelName}")
-	public String getModel(@PathParam("modelName") String modelName){
+	public String getDynamicModel(@PathParam("modelName") String modelName, @PathParam("id") String id){
 		try {
-			Model model = new ModelDAO().getModel(modelName);
-			return new Gson().toJson(model);
+			String str = modelName;
+			return new Gson().toJson(str);
 		} catch (Exception ex) {
 			return "[{\"status\":\"erro\",\"mensagem\":\"" + ex.getMessage() + "\"}]";
 		}
@@ -47,7 +54,7 @@ public class ModelResource {
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response createModel(String body){
+	public Response createDynamicModel(String body){
 		try{
 			Gson gson = new GsonBuilder().create();
 			Model model = gson.fromJson(body, Model.class);		
@@ -60,5 +67,6 @@ public class ModelResource {
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
 		}
 	}
-		
+	
+	
 }

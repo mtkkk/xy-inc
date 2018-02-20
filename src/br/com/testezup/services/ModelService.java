@@ -14,7 +14,7 @@ public class ModelService {
 		
 		String columns = setTableColumns(model);
 		if(columns.length() > 0){
-			dao.createNewModel(model.getModelName(),columns);
+			dao.createNewModel(model.getModelName(),columns,model.getPrimarykey());
 		}		
 		
 		dao.insertNewModel(model.getModelName());
@@ -29,6 +29,7 @@ public class ModelService {
 		StringBuilder str = new StringBuilder();
 		
 		for(Entry<String,String> entry : model.getAttributes().entrySet()){
+			
 			switch(entry.getValue().toLowerCase()){
 			
 			case "string":
@@ -38,7 +39,19 @@ public class ModelService {
 				str.append(entry.getKey().toLowerCase() + " int,");
 				break;
 			case "decimal":
+				str.append(entry.getKey().toLowerCase() + " decimal,");
+				break;
+			case "double":
 				str.append(entry.getKey().toLowerCase() + " double,");
+				break;
+			case "float":
+				str.append(entry.getKey().toLowerCase() + " float,");
+				break;
+			case "date":
+				str.append(entry.getKey().toLowerCase() + " date,");
+				break;
+			case "char":
+				str.append(entry.getKey().toLowerCase() + " char,");
 				break;
 			}
 		}

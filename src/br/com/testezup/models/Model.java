@@ -6,6 +6,7 @@ public class Model {
 
 	private String modelName;
 	private Map<String,String> attributes;
+	private String primarykey;
 	
 	public String getModelName() {
 		return modelName;
@@ -19,6 +20,11 @@ public class Model {
 	public void setAttributes(Map<String, String> attributes) {
 		this.attributes = attributes;
 	}
-
+	public String getPrimarykey() {
+		return primarykey;
+	}
+	public void setPrimarykey(String primarykey) {
+		this.primarykey = primarykey;
+	}
 	
 }

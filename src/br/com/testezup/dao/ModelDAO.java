@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import br.com.testezup.models.Model;
 import br.com.testezup.sql.Statements;
@@ -28,6 +30,7 @@ public class ModelDAO {
 		this.con = con;
 	}
 	
+	//Retorna todos os modelos
 	public List<String> getModels(){
 		try{
 			List<String> models = new ArrayList<String>();
@@ -49,6 +52,7 @@ public class ModelDAO {
 		}
 	}	
 	
+	//Retorna um modelo específico
 	public Model getModel(String modelName){
 		try{
 			Model model = new Model();
@@ -67,6 +71,30 @@ public class ModelDAO {
 			stmt.close();
 			
 			return model;
+		} catch (SQLException ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	//Retorna um mapeamento de quais são os atributos e seu tipo
+	public Map<String,String> getAttributes(String modelName){
+		try{
+			Map<String,String> attributes = new HashMap<String,String>();
+			String query = Statements.getAttributes();
+			PreparedStatement stmt = con.prepareStatement(query);					
+			
+			stmt.setString(1, modelName);
+			
+			ResultSet rs = stmt.executeQuery();
+			
+			while(rs.next()){								
+				attributes.put(rs.getString("attrname"),rs.getString("attrtype"));
+			}
+			
+			rs.close();
+			stmt.close();
+			
+			return attributes;
 		} catch (SQLException ex){
 			throw new RuntimeException(ex);
 		}
@@ -105,9 +133,9 @@ public class ModelDAO {
 		}		
 	}
 
-	public void createNewModel(String modelName, String columns) {
+	public void createNewModel(String modelName, String columns, String pk) {
 		try{
-			String query = Statements.createModel(modelName,columns);
+			String query = Statements.createModel(modelName,columns,pk);
 			PreparedStatement stmt = con.prepareStatement(query);			
 			
 			stmt.execute();

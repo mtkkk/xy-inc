@@ -4,7 +4,7 @@ public class Statements {
 
 	
 	/*
-	 * Statements MODELS
+	 * Statements Models
 	 */
 	public static String insertNewModel(){
 		String sql = "insert into models (name,creationdate) values (?,sysdate())";
@@ -16,7 +16,8 @@ public class Statements {
 		String sql = "insert into modelattributes (modelname,attrname,attrtype) values(?,?,?)";
 		
 		return sql;
-	}	
+	}
+	
 	public static String getModels(){
 		String sql = "select name from models";
 		
@@ -30,12 +31,17 @@ public class Statements {
 		return sql;
 	}
 	
-	public static String createModel(String modelName, String columns){
+	public static String getAttributes(){
+		String sql = "select attrname, attrtype from modelattributes where modelname = ? ";
+		
+		return sql;
+	}
+	
+	public static String createModel(String modelName, String columns, String pk){
 		String sql = "create table " + modelName +
-						" (" +
-						"id int not null auto_increment," +
+						" (" +						
 						columns +
-						"primary key(id)" +
+						"primary key("+pk+")" +
 						")";
 		
 		return sql;
@@ -47,6 +53,19 @@ public class Statements {
 		return sql;
 	}
 
-
+	/*
+	 * Statements DynamicModels
+	 */
+	public static String getDynamicModels(String modelName){
+		String sql = "select * from " + modelName;
+		
+		return sql;
+	}
+	
+	public static String getDynamicModelRow(String tableName, String tableColumns, String key){
+		String sql = "select " + tableColumns + " from " + tableName + " where " + key + " = ?";
+		
+		return sql;
+	}
 		
 }
