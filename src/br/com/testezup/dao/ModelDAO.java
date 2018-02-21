@@ -105,7 +105,7 @@ public class ModelDAO {
 			String query = Statements.insertNewModel();
 			PreparedStatement stmt = con.prepareStatement(query);
 			
-			stmt.setString(1, model.getModelName());
+			stmt.setString(1, model.getModelName().toLowerCase());
 			stmt.setString(2, model.getPrimarykey());
 			
 			stmt.execute();
@@ -146,5 +146,27 @@ public class ModelDAO {
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}		
+	}
+
+	public void deleteModel(String id) {
+		try{
+			String query = Statements.deleteModel();
+			PreparedStatement stmt = con.prepareStatement(query);
+			
+			stmt.setString(1, id);
+			
+			stmt.execute();
+			stmt.close();
+			
+			query = Statements.dropTable(id);
+			stmt = con.prepareStatement(query);
+			
+			stmt.execute();
+			stmt.close();
+			
+			
+		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 }

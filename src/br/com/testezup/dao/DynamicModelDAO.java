@@ -126,6 +126,37 @@ public class DynamicModelDAO {
 		}		
 	}
 	
+	public void updateDynamicModelEntry(String modelName, String columns, Map<String, String> attributes,
+			DynamicModelEntry dmEntry, String id) throws Exception {
+		try{
+			String key = getPrimaryKey(modelName);
+			String query = Statements.updateDynamicModelEntry(modelName,columns,key,id);
+			PreparedStatement stmt = con.prepareStatement(query);			
+			
+			setVariables(stmt,columns,attributes,dmEntry);
+			
+			stmt.execute();
+			stmt.close();
+		} catch (SQLException ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	public void deleteDynamicModelEntry(String modelName, String id) throws Exception {
+		try{
+			String key = getPrimaryKey(modelName);
+			String query = Statements.deleteDynamicModelEntry(modelName,id,key);
+			PreparedStatement stmt = con.prepareStatement(query);					
+			
+			stmt.execute();
+			stmt.close();
+			
+			
+		}  catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		}		
+	}
+	
 	public String getPrimaryKey(String modelName) throws Exception{
 		try{
 			//Buscar a chave primária para este modelo
@@ -208,7 +239,8 @@ public class DynamicModelDAO {
 		try {
 			String[] columns = columnsString.split(",");
 			int iterator = 1;
-			for(String col : columns){				
+			for(String col : columns){
+				col = col.replace("?", "").replace("=", "").trim();
 				switch(attributes.get(col).toLowerCase()){
 				case "string":
 					stmt.setString(iterator, entry.get(col));
@@ -223,7 +255,6 @@ public class DynamicModelDAO {
 					stmt.setFloat(iterator, Float.parseFloat(entry.get(col)));
 					break;
 				case "date":
-					DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 					LocalDate date =  LocalDate.parse(entry.get(col));					  
 					stmt.setObject(iterator, date);
 					break;					
@@ -235,4 +266,6 @@ public class DynamicModelDAO {
 			throw new RuntimeException(ex);
 		}
 	}
+
+	
 }

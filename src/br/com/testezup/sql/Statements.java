@@ -19,7 +19,7 @@ public class Statements {
 	}
 	
 	public static String getModels(){
-		String sql = "select name from models";
+		String sql = "select name from models where name not in ('adminunittest')";
 		
 		return sql;
 	}
@@ -58,6 +58,12 @@ public class Statements {
 		
 		return sql;
 	}
+	
+	public static String dropTable(String modelName){
+		String sql = "drop table " + modelName;
+		
+		return sql;
+	}
 
 	/*
 	 * Statements DynamicModels
@@ -76,6 +82,33 @@ public class Statements {
 		
 	public static String createDynamicModelEntry(String modelName, String columns, String values){
 		String sql = "insert into " + modelName + "(" + columns + ") values " + values;
+		
+		return sql;
+	}
+	
+	public static String updateDynamicModelEntry(String modelName, String columns, String key, Object id){
+		String idStr;
+		if(key instanceof String){
+			idStr = "'" + id + "'";
+		} else {
+			idStr = id.toString();
+		}
+		
+		String sql = "update " + modelName + " set " + columns +						
+						" where " + key + " = " + idStr;
+		
+		return sql;
+	}
+
+	public static String deleteDynamicModelEntry(String modelName, Object id, String key) {
+		String idStr;
+		if(key instanceof String){
+			idStr = "'" + id + "'";
+		} else {
+			idStr = id.toString();
+		}
+		
+		String sql = "delete from " + modelName + " where " + key + " = " + idStr;
 		
 		return sql;
 	}

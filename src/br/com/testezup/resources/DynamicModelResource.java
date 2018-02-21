@@ -27,12 +27,12 @@ import br.com.testezup.models.Model;
 import br.com.testezup.services.DynamicModelService;
 import br.com.testezup.services.ModelService;
 
-@Path("models/{modelName}")
+@Path("models/baas/{modelName}")
 public class DynamicModelResource {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getDynamicModels(@PathParam("modelName") String modelName){
+	public String getDynamicModelsEntries(@PathParam("modelName") String modelName){
 		try {		
 			
 			JSONArray dmEntries = new DynamicModelService().getDynamicModels(modelName);
@@ -49,7 +49,7 @@ public class DynamicModelResource {
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getDynamicModel(@PathParam("modelName") String modelName, @PathParam("id") String id){
+	public String getDynamicModelEntry(@PathParam("modelName") String modelName, @PathParam("id") String id){
 		try {
 			
 			JSONObject dmEntry = new DynamicModelService().getDynamicModel(modelName,id);
@@ -72,7 +72,7 @@ public class DynamicModelResource {
 			
 			String entryPath = new DynamicModelService().createDynamicModelEntry(dmEntry,modelName);
 			
-			URI uri = URI.create("/xy-inc/api/models/" + modelName + "/" + entryPath);
+			URI uri = URI.create("/xy-inc/api/models/baas/" + modelName + "/" + entryPath);
 			return Response.created(uri).build();
 		} catch	(Exception ex){			
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
@@ -84,7 +84,11 @@ public class DynamicModelResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response updateDynamicModelEntry(String body, @PathParam("modelName") String modelName, @PathParam("id") String id){
 		try{
-
+			Gson gson = new GsonBuilder().create();
+			DynamicModelEntry dmEntry = gson.fromJson(body, DynamicModelEntry.class);
+			
+			new DynamicModelService().updateDynamicModelEntry(dmEntry,modelName,id);
+			
 			return Response.ok().build();
 		} catch	(Exception ex){			
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
@@ -95,7 +99,9 @@ public class DynamicModelResource {
 	@Path("{id}")
 	public Response deleteDynamicModelEntry(@PathParam("modelName") String modelName, @PathParam("id") String id){
 		try{
-
+			
+			new DynamicModelService().deleteDynamicModelEntry(modelName,id);
+			
 			return Response.ok().build();
 		} catch	(Exception ex){			
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
