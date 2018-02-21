@@ -7,7 +7,7 @@ public class Statements {
 	 * Statements Models
 	 */
 	public static String insertNewModel(){
-		String sql = "insert into models (name,creationdate) values (?,sysdate())";
+		String sql = "insert into models (name,creationdate,primarykey) values (?,sysdate(),?)";
 		
 		return sql;
 	}
@@ -52,6 +52,12 @@ public class Statements {
 		
 		return sql;
 	}
+	
+	public static String getPrimaryKey(){
+		String sql = "select primarykey from models where name = ? ";
+		
+		return sql;
+	}
 
 	/*
 	 * Statements DynamicModels
@@ -62,10 +68,15 @@ public class Statements {
 		return sql;
 	}
 	
-	public static String getDynamicModelRow(String tableName, String tableColumns, String key){
-		String sql = "select " + tableColumns + " from " + tableName + " where " + key + " = ?";
+	public static String getDynamicModel(String modelName, String key){
+		String sql = "select * from " + modelName + " where " + key + " = ?";
 		
 		return sql;
 	}
 		
+	public static String createDynamicModelEntry(String modelName, String columns, String values){
+		String sql = "insert into " + modelName + "(" + columns + ") values " + values;
+		
+		return sql;
+	}
 }

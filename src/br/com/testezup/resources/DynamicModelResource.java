@@ -4,8 +4,10 @@ import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -20,6 +22,7 @@ import com.google.gson.GsonBuilder;
 
 import br.com.testezup.dao.DynamicModelDAO;
 import br.com.testezup.dao.ModelDAO;
+import br.com.testezup.models.DynamicModelEntry;
 import br.com.testezup.models.Model;
 import br.com.testezup.services.DynamicModelService;
 import br.com.testezup.services.ModelService;
@@ -32,11 +35,14 @@ public class DynamicModelResource {
 	public String getDynamicModels(@PathParam("modelName") String modelName){
 		try {		
 			
-			JSONArray data = new DynamicModelService().getDynamicModels(modelName);
+			JSONArray dmEntries = new DynamicModelService().getDynamicModels(modelName);
 			
-			return data.toString();
+			return dmEntries.toString();
 		} catch (Exception ex) {
-			return "[{\"status\":\"erro\",\"mensagem\":\"" + ex.getMessage() + "\"}]";
+			JSONObject jObj = new JSONObject();
+			jObj.put("status", "error");
+			jObj.put("message:", ex.getMessage());
+			return jObj.toString();
 		}
 	}
 	
@@ -45,24 +51,52 @@ public class DynamicModelResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getDynamicModel(@PathParam("modelName") String modelName, @PathParam("id") String id){
 		try {
-			String str = modelName;
-			return new Gson().toJson(str);
+			
+			JSONObject dmEntry = new DynamicModelService().getDynamicModel(modelName,id);
+			
+			return dmEntry.toString();
 		} catch (Exception ex) {
-			return "[{\"status\":\"erro\",\"mensagem\":\"" + ex.getMessage() + "\"}]";
+			JSONObject jObj = new JSONObject();
+			jObj.put("status", "error");
+			jObj.put("message:", ex.getMessage());
+			return jObj.toString();
 		}
 	}
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response createDynamicModel(String body){
+	public Response createDynamicModelEntry(String body, @PathParam("modelName") String modelName){
 		try{
 			Gson gson = new GsonBuilder().create();
-			Model model = gson.fromJson(body, Model.class);		
+			DynamicModelEntry dmEntry = gson.fromJson(body, DynamicModelEntry.class);		
 			
-			new ModelService().createModel(model);
+			String entryPath = new DynamicModelService().createDynamicModelEntry(dmEntry,modelName);
 			
-			URI uri = URI.create("/xy-inc/api/models/" + model.getModelName());
+			URI uri = URI.create("/xy-inc/api/models/" + modelName + "/" + entryPath);
 			return Response.created(uri).build();
+		} catch	(Exception ex){			
+			return Response.serverError().entity(ex.getCause().getMessage()).build();
+		}
+	}
+	
+	@PUT
+	@Path("{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response updateDynamicModelEntry(String body, @PathParam("modelName") String modelName, @PathParam("id") String id){
+		try{
+
+			return Response.ok().build();
+		} catch	(Exception ex){			
+			return Response.serverError().entity(ex.getCause().getMessage()).build();
+		}
+	}
+	
+	@DELETE
+	@Path("{id}")
+	public Response deleteDynamicModelEntry(@PathParam("modelName") String modelName, @PathParam("id") String id){
+		try{
+
+			return Response.ok().build();
 		} catch	(Exception ex){			
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
 		}

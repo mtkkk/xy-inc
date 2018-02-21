@@ -100,12 +100,13 @@ public class ModelDAO {
 		}
 	}
 	
-	public void insertNewModel(String modelName){
+	public void insertNewModel(Model model){
 		try{
 			String query = Statements.insertNewModel();
 			PreparedStatement stmt = con.prepareStatement(query);
 			
-			stmt.setString(1, modelName);
+			stmt.setString(1, model.getModelName());
+			stmt.setString(2, model.getPrimarykey());
 			
 			stmt.execute();
 			stmt.close();

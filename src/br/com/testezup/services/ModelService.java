@@ -17,14 +17,14 @@ public class ModelService {
 			dao.createNewModel(model.getModelName(),columns,model.getPrimarykey());
 		}		
 		
-		dao.insertNewModel(model.getModelName());
+		dao.insertNewModel(model);
 		for(Entry<String,String> entry : model.getAttributes().entrySet()){
 			dao.insertNewModelAttributes(model.getModelName(),entry.getKey().toLowerCase(),entry.getValue().toLowerCase());
 		}
 		
 	}
 	
-	//Monta a string contendo quais colunas serão criadas para a tabela
+	//Monta a string contendo quais colunas serão criadas para a tabela e seus tipos
 	public String setTableColumns(Model model){
 		StringBuilder str = new StringBuilder();
 		
