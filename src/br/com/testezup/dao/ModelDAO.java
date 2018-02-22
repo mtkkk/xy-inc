@@ -65,6 +65,7 @@ public class ModelDAO {
 			
 			while(rs.next()){								
 				model.setModelName(rs.getString("name"));
+				model.setPrimarykey(rs.getString("primarykey"));
 			}
 			
 			rs.close();

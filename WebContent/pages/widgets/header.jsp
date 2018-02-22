@@ -9,7 +9,6 @@
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <script src="js/bootstrap.min.js"></script>
 <script src="js/jquery-3.2.1.min.js"></script>
-<script src="js/meubanco.js"></script>
 </head>
 <body>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">

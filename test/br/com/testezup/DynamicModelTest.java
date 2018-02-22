@@ -45,6 +45,8 @@ public class DynamicModelTest {
 		WebTarget target = client.target(hostname);
 		String response = target.path("/xy-inc/api/models/baas/adminunittest/admin").request().get(String.class);
 		Assert.assertTrue(response.contains("admin"));
+		System.out.println("Teste2: t2_testsGettingSpecificDynamicModel");
+		System.out.println(response);
 	}
 	
 	@Test
@@ -54,6 +56,8 @@ public class DynamicModelTest {
 		WebTarget target = client.target(hostname);
 		String response = target.path("/xy-inc/api/models/baas/adminunittest/").request().get(String.class);		
 		Assert.assertTrue(response.contains("admin"));
+		System.out.println("Teste3: t3_testsGettingAllDynamicModels");
+		System.out.println(response);
 		
 	}
 	

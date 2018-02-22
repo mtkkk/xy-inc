@@ -20,7 +20,7 @@ import br.com.testezup.dao.ModelDAO;
 import br.com.testezup.models.Model;
 import br.com.testezup.services.ModelService;
 
-@Path("models")
+@Path("v1/models")
 public class ModelResource {
 
 	@GET
