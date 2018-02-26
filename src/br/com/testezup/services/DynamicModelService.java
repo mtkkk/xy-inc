@@ -55,7 +55,8 @@ public class DynamicModelService {
 	public String createDynamicModelEntryMongo(Map<String,Object> entry, String modelName) {
 		try{
 			Document doc = prepareNewDocument(entry, modelName);
-			//TODO
+			
+			new DynamicModelDAO().createDynamicModelEntryMongo(doc,modelName);
 			return "";
 		} catch (Exception ex) {
 			throw ex;

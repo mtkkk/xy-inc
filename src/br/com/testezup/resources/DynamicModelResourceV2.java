@@ -26,7 +26,7 @@ public class DynamicModelResourceV2 {
 			Gson gson = new GsonBuilder().create();
 			Map<String,Object> dmEntry = gson.fromJson(body, HashMap.class);		
 			
-			String entryPath = new DynamicModelService().createDynamicModelEntryMongo(dmEntry,modelName);
+			String entryPath = new DynamicModelService().createDynamicModelEntryMongo(dmEntry,modelName.toLowerCase());
 			
 			URI uri = URI.create("/xy-inc/api/models/baas/" + modelName + "/" + entryPath);
 			return Response.created(uri).build();

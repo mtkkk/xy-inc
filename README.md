@@ -68,9 +68,15 @@ Não deu tempo de fazer o front end mas já tenho experiência em consumo de API
 
 1.	Instalar o MongoDB Community 
 	
+	-Durante a instalação deixe marcado para instalar MongoDB Compass também
+
 	-A conexão no projeto está configurada para o port 27017
 	
 	-Sem usuário e senha
+
+	-Após instalação rodar o arquivo mongod.exe na pasta de instalação para inicializar o servidor(Padrão C:\Program Files\MongoDB\Server\3.6\bin)
+
+	-Caso inicie e imediatamente feche verifique se a pasta C:\data\db foi criada (padrão)
 	
 2.	Na pasta de instalação do MongoDB (Padrão C:\Program Files\MongoDB\Server\3.6\bin) executar mongo.exe para abrir o shell
 

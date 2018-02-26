@@ -6,39 +6,45 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.time.*;
 
-import javax.json.JsonObject;
-
+import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+
 import br.com.testezup.models.DynamicModelEntry;
-import br.com.testezup.models.Model;
 import br.com.testezup.sql.Statements;
 
 public class DynamicModelDAO {
 
 	private Connection con;
+	private MongoDatabase db;
 	Savepoint save;
 	
 	public DynamicModelDAO(){
 		try{
-			this.con = new ConnectionFactory().getConnection();					
+			this.con = new ConnectionFactory().getConnection();
+			this.db = new ConnectionFactory().getMongoDataBase();
 		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		} catch (Exception ex){
 			throw new RuntimeException(ex);
 		}
 	}
 	
 	public DynamicModelDAO(Connection con){
 		this.con = con;
+	}
+	
+	public DynamicModelDAO(MongoDatabase db){
+		this.db = db;
 	}
 	
 	public JSONArray getDynamicModels(String modelName){
@@ -124,6 +130,16 @@ public class DynamicModelDAO {
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}		
+	}
+	
+	public void createDynamicModelEntryMongo(Document doc, String modelName) {
+		try{
+			MongoCollection collection = db.getCollection(modelName);
+			collection.insertOne(doc);
+			
+		} catch(Exception ex){
+			throw new RuntimeException(ex);
+		}
 	}
 	
 	public void updateDynamicModelEntry(String modelName, String columns, Map<String, String> attributes,
@@ -266,6 +282,5 @@ public class DynamicModelDAO {
 			throw new RuntimeException(ex);
 		}
 	}
-
 	
 }
