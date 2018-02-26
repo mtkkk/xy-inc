@@ -25,7 +25,7 @@ public class Statements {
 	}
 	
 	public static String getModel(){
-		String sql = "select name from models " +
+		String sql = "select name, primarykey from models " +
 						"where name = ? ";
 		
 		return sql;

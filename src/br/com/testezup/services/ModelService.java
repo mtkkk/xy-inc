@@ -1,14 +1,50 @@
 package br.com.testezup.services;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import br.com.testezup.dao.DynamicModelDAO;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ValidationLevel;
+import com.mongodb.client.model.ValidationOptions;
+
 import br.com.testezup.dao.ModelDAO;
 import br.com.testezup.models.Model;
 
 public class ModelService {
 
+	public List<Document> getModels(){
+		try{
+			return new ModelDAO().getModelsMongo();
+		} catch(Exception ex){
+			throw ex;
+		}
+	}
+	
+	public Document getModelMongo(String id) {
+		try{
+			return new ModelDAO().getModelMongo(id);
+		} catch(Exception ex){
+			throw ex;
+		}		
+	}
+	
+	//Método para criar um novo model e também criar a collection deste model no MongoDB
+	public void createModelMongo(Model model){
+		try{
+			ModelDAO dao = new ModelDAO();
+			Document doc = prepareNewDocument(model);
+			
+			dao.createNewModelMongo(doc,createValidator(model.getAttributes()));
+			
+		} catch(Exception ex){
+			throw ex;
+		}
+	}
 	//Cria a tabela a partir do modelo fornecido, guardando também um registro das informações passadas
 	public void createModel(Model model) throws Exception{
 		try{
@@ -37,6 +73,14 @@ public class ModelService {
 		} catch (Exception ex) {
 			throw ex;
 		}	
+	}
+	
+	public void deleteModelMongo(String id) {		
+		try{
+			new ModelDAO().deleteModelMongo(id);
+		} catch (Exception ex) {
+			throw ex;
+		}
 	}
 	
 	//Monta a string contendo quais colunas serão criadas para a tabela e seus tipos
@@ -75,4 +119,31 @@ public class ModelService {
 		
 		return str.toString();
 	}
+	
+	public Document prepareNewDocument(Model model){
+		Document doc = new Document("name",model.getModelName().toLowerCase());
+		
+		if(model.getAttributes().size() > 0){			
+			doc.append("attributes", model.getAttributes());			
+		} else {
+			throw new RuntimeException("O modelo que está tentando criar não possui nenhum atributo, verifique a sintaxe e tente novamente");
+		}
+		
+		return doc;
+	}
+	
+	//Cria o validator que será usado para validar o tipo de dado para cada campo de acordo com os tipos passados na criação do modelo
+	public ValidationOptions createValidator(Map<String,String> attributes){
+		ValidationOptions options = new ValidationOptions();
+		List<Bson> rules = new ArrayList<Bson>();
+		
+		for(Entry<String,String> entry : attributes.entrySet()){
+			rules.add(Filters.type(entry.getKey().toLowerCase(), entry.getValue().toLowerCase()));
+		}
+		
+		options.validator(Filters.and(rules));
+		
+		return options; 	
+	}	
+	
 }

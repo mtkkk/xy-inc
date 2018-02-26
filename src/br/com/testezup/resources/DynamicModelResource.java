@@ -27,7 +27,7 @@ import br.com.testezup.models.Model;
 import br.com.testezup.services.DynamicModelService;
 import br.com.testezup.services.ModelService;
 
-@Path("models/baas/{modelName}")
+@Path("v1/models/baas/{modelName}")
 public class DynamicModelResource {
 	
 	@GET

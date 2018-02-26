@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-
-import com.mysql.jdbc.*;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 public class ConnectionFactory {
 
@@ -23,15 +23,14 @@ public class ConnectionFactory {
 		
 	}
 	
-	public MongoClient getClient() {
+	public MongoDatabase getMongoDataBase() throws Exception {
 		try{
-			Class.forName("");
-			MongoClientURI clientURI = new MongoClientURI("");
-			MongoClient mongoClient = new MongoClient(clientURI);
-			
-			return mongoClient;
+			MongoClientURI clientURI = new MongoClientURI("mongodb://localhost:27017/zupdb");
+			MongoClient mongoClient = new MongoClient(clientURI);			
+			MongoDatabase db = mongoClient.getDatabase("zupdb");						
+			return db;
 		} catch (Exception ex) {
-			
+			throw new Exception(ex);
 		}
 	}
 

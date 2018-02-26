@@ -13,6 +13,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.bson.Document;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -20,14 +22,14 @@ import br.com.testezup.dao.ModelDAO;
 import br.com.testezup.models.Model;
 import br.com.testezup.services.ModelService;
 
-@Path("v1/models")
-public class ModelResource {
+@Path("v2/models")
+public class ModelResourceV2 {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getModels(){
 		try {
-			List<String> models = new ModelDAO().getModels();
+			List<Document> models = new ModelService().getModels();
 			return new Gson().toJson(models);
 		} catch (Exception ex) {
 			return "[{\"status\":\"erro\",\"mensagem\":\"" + ex.getMessage() + "\"}]";
@@ -36,11 +38,11 @@ public class ModelResource {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{modelName}")
-	public String getModel(@PathParam("modelName") String modelName){
+	@Path("{id}")
+	public String getModel(@PathParam("id") String id){
 		try {
-			Model model = new ModelDAO().getModel(modelName.toLowerCase());
-			return new Gson().toJson(model);
+			Document doc = new ModelService().getModelMongo(id.toLowerCase());
+			return new Gson().toJson(doc);
 		} catch (Exception ex) {
 			return "[{\"status\":\"erro\",\"mensagem\":\"" + ex.getMessage() + "\"}]";
 		}
@@ -54,9 +56,8 @@ public class ModelResource {
 			Model model = gson.fromJson(body, Model.class);		
 			
 			new ModelService().createModelMongo(model);
-			new ModelService().createModel(model);
 			
-			URI uri = URI.create("/xy-inc/api/v1/models/" + model.getModelName());
+			URI uri = URI.create("/xy-inc/api/v2/models/" + model.getModelName().toLowerCase());
 			return Response.created(uri).build();
 		} catch	(Exception ex){			
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
@@ -66,14 +67,13 @@ public class ModelResource {
 	@DELETE
 	@Path("{id}")
 	public Response deleteModel(@PathParam("id") String id){
-		try{				
-			
-			new ModelService().deleteModel(id.toLowerCase());
+		try{							
+			new ModelService().deleteModelMongo(id.toLowerCase());
 						
 			return Response.ok().build();
 		} catch	(Exception ex){			
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
 		}
 	}
-		
+	
 }

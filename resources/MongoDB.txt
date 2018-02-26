@@ -1,0 +1,20 @@
+use zupdb
+
+db.createCollection( "models", {
+   validator: { $jsonSchema: {
+      bsonType: "object",
+      required: [ "name","attributes" ],
+      properties: {
+         name: {
+            bsonType: "string",
+            description: "Deve existir o nome do modelo"
+         },
+         attributes: {
+            bsonType : "object",
+            description: "Os atributos e seus tipos"
+         }
+      }
+   } }
+} )
+
+db.models.createIndex({ "name": 1 },{ unique: true })

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -46,6 +47,16 @@ public class DynamicModelService {
 			}
 			
 			return dmEntry.get(dao.getPrimaryKey(modelName)).toString();				
+		} catch (Exception ex) {
+			throw ex;
+		}
+	}
+	
+	public String createDynamicModelEntryMongo(Map<String,Object> entry, String modelName) {
+		try{
+			Document doc = prepareNewDocument(entry, modelName);
+			//TODO
+			return "";
 		} catch (Exception ex) {
 			throw ex;
 		}
@@ -133,5 +144,15 @@ public class DynamicModelService {
 		str.append(") ");
 		
 		return str.toString();
+	}	
+	
+	public Document prepareNewDocument(Map<String,Object> entry, String modelName){
+		Document doc = new Document();
+		
+		for(Entry<String,Object> e : entry.entrySet()){
+			doc.append(e.getKey(), e.getValue());
+		}
+		
+		return doc;
 	}
 }

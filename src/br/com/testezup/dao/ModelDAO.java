@@ -10,24 +10,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.Document;
+
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.ValidationOptions;
+import com.mongodb.client.model.Projections;
+
 import br.com.testezup.models.Model;
 import br.com.testezup.sql.Statements;
 
 public class ModelDAO {
 
 	private Connection con;
+	private MongoDatabase db;
 	Savepoint save;
 	
 	public ModelDAO(){
 		try{
-			this.con = new ConnectionFactory().getConnection();					
+			this.con = new ConnectionFactory().getConnection();
+			this.db = new ConnectionFactory().getMongoDataBase();
 		} catch (SQLException ex) {
+			throw new RuntimeException(ex);
+		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 	
 	public ModelDAO(Connection con){
-		this.con = con;
+		this.con = con;		
+	}
+	
+	public ModelDAO(MongoDatabase db){
+		this.db = db;		
 	}
 	
 	//Retorna todos os modelos
@@ -52,6 +69,23 @@ public class ModelDAO {
 		}
 	}	
 	
+	public List<Document> getModelsMongo() {
+		try{
+			List<Document> docs = new ArrayList<Document>();
+			MongoCollection collection = db.getCollection("models");
+			FindIterable<Document> foundDocs = collection.find();
+			foundDocs.projection(Projections.excludeId());
+			
+			for(Document doc : foundDocs){
+				docs.add(doc);
+			}
+			
+			return docs;
+		} catch (Exception ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
 	//Retorna um modelo específico
 	public Model getModel(String modelName){
 		try{
@@ -65,6 +99,7 @@ public class ModelDAO {
 			
 			while(rs.next()){								
 				model.setModelName(rs.getString("name"));
+				model.setPrimarykey(rs.getString("primarykey"));
 			}
 			
 			rs.close();
@@ -74,6 +109,14 @@ public class ModelDAO {
 		} catch (SQLException ex){
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	public Document getModelMongo(String id) {
+		Document doc = new Document();
+		MongoCollection collection = db.getCollection("models");
+		doc = (Document) collection.find(new Document("name",id)).projection(Projections.excludeId()).first();
+		
+		return doc;
 	}
 	
 	//Retorna um mapeamento de quais são os atributos e seu tipo
@@ -115,6 +158,20 @@ public class ModelDAO {
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+	
+	public void createNewModelMongo(Document doc, ValidationOptions options){
+		try{
+			MongoCollection collection = db.getCollection("models");			
+			collection.insertOne(doc);
+			createNewMongoCollection(doc,options);
+		} catch	(Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	public void createNewMongoCollection(Document doc, ValidationOptions options){
+		db.createCollection(doc.get("name").toString(), new CreateCollectionOptions().validationOptions(options));
 	}
 
 	public void insertNewModelAttributes(String modelName, String attrname, String attrtype) {
@@ -169,4 +226,16 @@ public class ModelDAO {
 			throw new RuntimeException(ex);
 		}
 	}
+	
+	public void deleteModelMongo(String id){
+		try{
+			MongoCollection collection = db.getCollection(id);
+			collection.drop();
+			collection = db.getCollection("models");
+			collection.findOneAndDelete(new Document("name",id));			
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
 }
