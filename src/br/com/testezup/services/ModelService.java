@@ -16,10 +16,16 @@ import br.com.testezup.dao.ModelDAO;
 import br.com.testezup.models.Model;
 
 public class ModelService {
+	
+	private ModelDAO dao;
+	
+	public ModelService(){
+		this.dao = new ModelDAO();
+	}
 
 	public List<Document> getModels(){
 		try{
-			return new ModelDAO().getModelsMongo();
+			return dao.getModelsMongo();
 		} catch(Exception ex){
 			throw ex;
 		}
@@ -27,7 +33,7 @@ public class ModelService {
 	
 	public Document getModelMongo(String id) {
 		try{
-			return new ModelDAO().getModelMongo(id);
+			return dao.getModelMongo(id);
 		} catch(Exception ex){
 			throw ex;
 		}		
@@ -36,11 +42,9 @@ public class ModelService {
 	//Método para criar um novo model e também criar a collection deste model no MongoDB
 	public void createModelMongo(Model model){
 		try{
-			ModelDAO dao = new ModelDAO();
 			Document doc = prepareNewDocument(model);
 			
-			dao.createNewModelMongo(doc,createValidator(model.getAttributes()));
-			
+			dao.createNewModelMongo(doc,createValidator(model.getAttributes()),getUniqueFields(model));			
 		} catch(Exception ex){
 			throw ex;
 		}
@@ -50,8 +54,7 @@ public class ModelService {
 		try{
 			if(model.getPrimarykey() == null) {
 				throw new Exception("A Primary Key deve ser informada");
-			}
-			ModelDAO dao = new ModelDAO();				
+			}			
 			
 			String columns = setTableColumns(model);
 			if(columns.length() > 0){
@@ -69,7 +72,7 @@ public class ModelService {
 	
 	public void deleteModel(String id) {
 		try{
-			new ModelDAO().deleteModel(id);
+			dao.deleteModel(id);
 		} catch (Exception ex) {
 			throw ex;
 		}	
@@ -77,7 +80,7 @@ public class ModelService {
 	
 	public void deleteModelMongo(String id) {		
 		try{
-			new ModelDAO().deleteModelMongo(id);
+			dao.deleteModelMongo(id);
 		} catch (Exception ex) {
 			throw ex;
 		}
@@ -120,15 +123,22 @@ public class ModelService {
 		return str.toString();
 	}
 	
+	//Cria o documento que será utilizado para inserir uma nova entrada no banco
 	public Document prepareNewDocument(Model model){
 		Document doc = new Document("name",model.getModelName().toLowerCase());
 		
 		if(model.getAttributes().size() > 0){			
 			doc.append("attributes", model.getAttributes());			
 		} else {
-			throw new RuntimeException("O modelo que está tentando criar não possui nenhum atributo, verifique a sintaxe e tente novamente");
+			throw new IllegalArgumentException("O modelo que está tentando criar não possui nenhum atributo, verifique a sintaxe e tente novamente");
 		}
 		
+		if(model.getRules() != null){
+			doc.append("rules", model.getRules());
+		} else {
+			throw new IllegalArgumentException("Nenhuma regra foi encontrada, por favor informe os campos obrigatórios");
+		}
+				
 		return doc;
 	}
 	
@@ -144,6 +154,31 @@ public class ModelService {
 		options.validator(Filters.and(rules));
 		
 		return options; 	
-	}	
+	}
+	
+	//Checa se existem regras para campos únicos e os retorna como lista (junto com o identifier)
+	public List<String> getUniqueFields(Model model){		
+		List<String> fields = new ArrayList<String>();
+		if(getIdentifier(model) != null){
+			fields.add(getIdentifier(model));
+		}
+		if(model.getRules().containsKey("unique")){
+			fields.addAll((List<String>) model.getRules().get("unique"));
+		}
+		
+		if(fields.size() <= 0) {
+			throw new IllegalArgumentException("Nenhuma regra foi encontrada, por favor informe os campos obrigatórios");
+		}
+		return fields;
+	}
+	
+	//Pega o campo utilizado como identifier do modelo
+	public String getIdentifier(Model model){
+		if(model.getRules().containsKey("identifier")){
+			return model.getRules().get("identifier").toString();
+		} else {
+			return null;
+		}
+	}
 	
 }

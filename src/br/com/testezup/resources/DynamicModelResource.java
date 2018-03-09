@@ -72,7 +72,7 @@ public class DynamicModelResource {
 			
 			String entryPath = new DynamicModelService().createDynamicModelEntry(dmEntry,modelName);
 			
-			URI uri = URI.create("/xy-inc/api/models/baas/" + modelName + "/" + entryPath);
+			URI uri = URI.create("/xy-inc/api/v1/models/baas/" + modelName + "/" + entryPath);
 			return Response.created(uri).build();
 		} catch	(Exception ex){			
 			return Response.serverError().entity(ex.getCause().getMessage()).build();

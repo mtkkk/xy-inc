@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Projections;
 
 import br.com.testezup.models.DynamicModelEntry;
 import br.com.testezup.sql.Statements;
@@ -81,6 +84,23 @@ public class DynamicModelDAO {
 		}
 	}	
 	
+	public List<Document> getDynamicModelsMongo(String modelName) {
+		try{
+			List<Document> docs = new ArrayList<Document>();
+			MongoCollection collection = db.getCollection(modelName);
+			FindIterable<Document> foundDocs = collection.find();
+			foundDocs.projection(Projections.excludeId());
+			
+			for(Document doc : foundDocs){
+				docs.add(doc);
+			}
+			
+			return docs;
+		} catch (Exception ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
 	public JSONObject getDynamicModel(String modelName, String id) throws Exception{
 		try{
 			
@@ -117,6 +137,20 @@ public class DynamicModelDAO {
 		}
 	}
 	
+	public Document getDynamicModelMongo(String modelName, String id){
+		try{
+			Document doc = new Document();
+			MongoCollection collection = db.getCollection(modelName);
+			
+			//TODO
+			//doc = (Document) collection.find(new Document("name",id)).projection(Projections.excludeId()).first();
+			
+			return doc;
+		} catch (Exception ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
 	public void createDynamicModelEntry(String modelName, String columns, String values, Map<String,String> attributes, DynamicModelEntry entry){
 		try{			
 			String query = Statements.createDynamicModelEntry(modelName,columns,values);
@@ -135,8 +169,7 @@ public class DynamicModelDAO {
 	public void createDynamicModelEntryMongo(Document doc, String modelName) {
 		try{
 			MongoCollection collection = db.getCollection(modelName);
-			collection.insertOne(doc);
-			
+			collection.insertOne(doc);			
 		} catch(Exception ex){
 			throw new RuntimeException(ex);
 		}
@@ -154,6 +187,18 @@ public class DynamicModelDAO {
 			stmt.execute();
 			stmt.close();
 		} catch (SQLException ex){
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	public void updateDynamicModelEntryMongo(Bson operation, String modelName){
+		try{			
+			MongoCollection collection = db.getCollection(modelName);
+			//TODO - SELECIONAR O DOCUMENTO ANTES
+			Document foundDoc = new Document();
+			collection.updateOne(foundDoc, operation);
+			
+		} catch(Exception ex){
 			throw new RuntimeException(ex);
 		}
 	}
@@ -282,5 +327,7 @@ public class DynamicModelDAO {
 			throw new RuntimeException(ex);
 		}
 	}
+
+	
 	
 }

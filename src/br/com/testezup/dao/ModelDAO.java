@@ -12,12 +12,14 @@ import java.util.Map;
 
 import org.bson.Document;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.ValidationOptions;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.ValidationOptions;
 
 import br.com.testezup.models.Model;
 import br.com.testezup.sql.Statements;
@@ -45,8 +47,16 @@ public class ModelDAO {
 	
 	public ModelDAO(MongoDatabase db){
 		this.db = db;		
-	}
+	}	
 	
+	public MongoDatabase getDb() {
+		return db;
+	}
+
+	public void setDb(MongoDatabase db) {
+		this.db = db;
+	}
+
 	//Retorna todos os modelos
 	public List<String> getModels(){
 		try{
@@ -111,12 +121,19 @@ public class ModelDAO {
 		}
 	}
 	
-	public Document getModelMongo(String id) {
+	public Document getModelMongo(String modelName) {
 		Document doc = new Document();
 		MongoCollection collection = db.getCollection("models");
-		doc = (Document) collection.find(new Document("name",id)).projection(Projections.excludeId()).first();
+		doc = (Document) collection.find(new Document("name",modelName)).projection(Projections.excludeId()).first();
 		
 		return doc;
+	}
+	
+	public String getModelIdentifier(String modelName){
+		Document doc = new Document();
+		MongoCollection collection = db.getCollection("models");
+		doc = (Document) collection.find(new Document("name",modelName)).projection(Projections.excludeId()).first();		
+		return ((Document) doc.get("rules")).get("identifier").toString();		
 	}
 	
 	//Retorna um mapeamento de quais são os atributos e seu tipo
@@ -160,11 +177,17 @@ public class ModelDAO {
 		}
 	}
 	
-	public void createNewModelMongo(Document doc, ValidationOptions options){
+	public void createNewModelMongo(Document doc, ValidationOptions options, List<String> uniqueFields){
 		try{
 			MongoCollection collection = db.getCollection("models");			
 			collection.insertOne(doc);
-			createNewMongoCollection(doc,options);
+			db.createCollection(doc.get("name").toString());
+			//createNewMongoCollection(doc,options);
+			
+			collection = db.getCollection(doc.get("name").toString());
+			for(String field : uniqueFields){
+				createNewUniqueIndex(collection,field);
+			}
 		} catch	(Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -172,6 +195,10 @@ public class ModelDAO {
 	
 	public void createNewMongoCollection(Document doc, ValidationOptions options){
 		db.createCollection(doc.get("name").toString(), new CreateCollectionOptions().validationOptions(options));
+	}
+	
+	public void createNewUniqueIndex(MongoCollection collection, String field){
+		collection.createIndex(new Document(field,1), new IndexOptions().unique(true));
 	}
 
 	public void insertNewModelAttributes(String modelName, String attrname, String attrtype) {
