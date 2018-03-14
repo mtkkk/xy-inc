@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.bson.Document;
+import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,9 +34,24 @@ public class DynamicModelResourceV2 {
 	public String getDynamicModelsEntries(@PathParam("modelName") String modelName){
 		try {		
 			
-			List<Document> dmEntries = new DynamicModelService().getDynamicModelsMongo(modelName);
+			List<Document> dmEntries = new DynamicModelService().getDynamicModelsMongo(modelName.toLowerCase());
 			
 			return new Gson().toJson(dmEntries);
+		} catch (Exception ex) {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();			
+			return gson.toJson(new DefaultResponseError(ex));
+		}
+	}
+	
+	@GET
+	@Path("{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getDynamicModelEntry(@PathParam("modelName") String modelName, @PathParam("id") String id){
+		try {
+			
+			Document dmEntry = new DynamicModelService().getDynamicModelMongo(modelName.toLowerCase(),id);
+			
+			return new Gson().toJson(dmEntry);
 		} catch (Exception ex) {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();			
 			return gson.toJson(new DefaultResponseError(ex));
@@ -69,6 +86,20 @@ public class DynamicModelResourceV2 {
 			modelName = modelName.toLowerCase();
 			
 			new DynamicModelService(modelName).updateDynamicModelEntryMongo(dmEntry,modelName,id);
+			
+			return Response.ok().build();
+		} catch	(Exception ex){			
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			return Response.serverError().entity(gson.toJson(new DefaultResponseError(ex))).build();
+		}
+	}
+	
+	@DELETE
+	@Path("{id}")
+	public Response deleteDynamicModelEntry(@PathParam("modelName") String modelName, @PathParam("id") String id){
+		try{
+			
+			new DynamicModelService().deleteDynamicModelEntryMongo(modelName.toLowerCase(),id);
 			
 			return Response.ok().build();
 		} catch	(Exception ex){			

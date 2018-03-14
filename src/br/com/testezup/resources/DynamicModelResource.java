@@ -107,6 +107,4 @@ public class DynamicModelResource {
 			return Response.serverError().entity(ex.getCause().getMessage()).build();
 		}
 	}
-	
-	
 }

@@ -1,8 +1,14 @@
 # xy-inc
 
+## Notas
+
+O projeto foi atualizado para suportar a versão 2 da API, no qual utilizei MongoDB para criar de forma mais simples e dinâmica os modelos.
+
+As instruções para instalar e rodar o projeto em MongoDB foram adicinadas ao fim do README.
+
 ## Arquitetura do projeto
 
-O projeto possui dois recursos, um responsável por criar consulta e deletar modelos baseado no input do usuário e outro 
+O projeto possui dois recursos, um responsável por criar consultar e deletar modelos baseado no input do usuário e outro 
 recurso que fornece um CRUD para estes modelos criados.
 
 Para criar um modelo é necessário informar seus campos e tipo de dados para cada campo, além de um campo que será a chave primária.
@@ -19,6 +25,7 @@ Após a criação de um modelo as suas informações também são guardadas em t
 	*JUnit
 	*GitHub Desktop
 	*Postman
+	*MongoDB
 
 ## Instruções para configurar o projeto
 

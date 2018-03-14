@@ -57,9 +57,20 @@ public class DynamicModelService {
 	}
 	
 	public JSONObject getDynamicModel(String modelName, String id) throws Exception{
-		try{
+		try{			
 			return dao.getDynamicModel(modelName,id);
 		} catch (Exception ex) {
+			throw ex;
+		}
+	}
+	
+	//Procura qual o identifier deste modelo e envia para buscar 
+	//Em uma evolução do sistema é possível fazer query string params para buscar por outros campos 
+	public Document getDynamicModelMongo(String modelName, String id){
+		try{
+			String identifier = mDao.getModelIdentifier(modelName);
+			return dao.getDynamicModelMongo(modelName, id, identifier);
+		} catch(Exception ex) {
 			throw ex;
 		}
 	}
@@ -90,6 +101,7 @@ public class DynamicModelService {
 			Document doc = prepareNewDocument(entry, modelName);
 			
 			dao.createDynamicModelEntryMongo(doc,modelName);
+			//TODO -> RETORNO
 			return "";
 		} catch (Exception ex) {
 			throw ex;
@@ -115,10 +127,11 @@ public class DynamicModelService {
 	public void updateDynamicModelEntryMongo(MongoEntry dmEntry, String modelName, String id) throws Exception {
 		try{
 			Document doc = prepareNewDocument(dmEntry, modelName);
+			String identifier = mDao.getModelIdentifier(modelName);
 			
 			Bson updateOperation = new Document("$set",doc);
 			
-			new DynamicModelDAO().updateDynamicModelEntryMongo(updateOperation,modelName);
+			dao.updateDynamicModelEntryMongo(updateOperation,modelName,id,identifier);
 		} catch (Exception ex) {
 			throw ex;
 		}
@@ -130,6 +143,15 @@ public class DynamicModelService {
 		} catch (Exception ex) {
 			throw ex;
 		}		
+	}
+	
+	public void deleteDynamicModelEntryMongo(String modelName, String id) {
+		try{
+			String identifier = mDao.getModelIdentifier(modelName);
+			dao.deleteDynamicModelEntryMongo(modelName,id,identifier);
+		} catch (Exception ex) {
+			throw ex;
+		}
 	}
 	
 	//Monta as colunas que serão inseridas na tabela do modelo
@@ -194,11 +216,8 @@ public class DynamicModelService {
 	public Document prepareNewDocument(MongoEntry entry, String modelName) throws ParseException{
 		Document doc = new Document();
 		
-		Model model = (Model) mDao.getModelMongo(modelName);
-		String identifier = mDao.getModelIdentifier(modelName);	
-		
 		for(Entry<String,Object> e : entry.entrySet()){
-			if((e.getKey()).toLowerCase() == "date"){ //Testes
+			if((e.getKey()).toLowerCase() == "date"){ //TODO -> Pegar o tipo
 				Date date = new SimpleDateFormat("dd/MM/yyyy").parse(e.getValue().toString());
 				doc.append(e.getKey(), date);
 			} else {

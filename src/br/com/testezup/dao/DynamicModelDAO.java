@@ -137,13 +137,12 @@ public class DynamicModelDAO {
 		}
 	}
 	
-	public Document getDynamicModelMongo(String modelName, String id){
+	public Document getDynamicModelMongo(String modelName, String id, String identifier){
 		try{
 			Document doc = new Document();
 			MongoCollection collection = db.getCollection(modelName);
-			
-			//TODO
-			//doc = (Document) collection.find(new Document("name",id)).projection(Projections.excludeId()).first();
+						
+			doc = (Document) collection.find(new Document(identifier,id)).projection(Projections.excludeId()).first();
 			
 			return doc;
 		} catch (Exception ex){
@@ -169,7 +168,7 @@ public class DynamicModelDAO {
 	public void createDynamicModelEntryMongo(Document doc, String modelName) {
 		try{
 			MongoCollection collection = db.getCollection(modelName);
-			collection.insertOne(doc);			
+			collection.insertOne(doc);
 		} catch(Exception ex){
 			throw new RuntimeException(ex);
 		}
@@ -191,11 +190,10 @@ public class DynamicModelDAO {
 		}
 	}
 	
-	public void updateDynamicModelEntryMongo(Bson operation, String modelName){
+	public void updateDynamicModelEntryMongo(Bson operation, String modelName, String id, String identifier){
 		try{			
 			MongoCollection collection = db.getCollection(modelName);
-			//TODO - SELECIONAR O DOCUMENTO ANTES
-			Document foundDoc = new Document();
+			Document foundDoc = (Document) collection.find(new Document(identifier,id)).projection(Projections.excludeId()).first();
 			collection.updateOne(foundDoc, operation);
 			
 		} catch(Exception ex){
@@ -213,9 +211,18 @@ public class DynamicModelDAO {
 			stmt.close();
 			
 			
-		}  catch (SQLException ex) {
+		}  catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}		
+	}
+	
+	public void deleteDynamicModelEntryMongo(String modelName, String id, String identifier) {
+		try{
+			MongoCollection collection = db.getCollection(modelName);
+			collection.deleteOne(new Document(identifier,id));
+		}  catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 	
 	public String getPrimaryKey(String modelName) throws Exception{
@@ -327,7 +334,5 @@ public class DynamicModelDAO {
 			throw new RuntimeException(ex);
 		}
 	}
-
-	
 	
 }
